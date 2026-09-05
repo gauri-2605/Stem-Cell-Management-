@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Simple Chatbot</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #chat { border: 1px solid #ccc; padding: 10px; height: 300px; overflow:auto; margin-bottom:10px; }
+    .user { color: blue; }
+    .bot { color: green; }
+  </style>
+</head>
+<body>
+  <h2>Chatbot</h2>
+  <div id="chat"></div>
+  <input id="msg" type="text" placeholder="Type a message" style="width:70%" />
+  <button id="send">Send</button>
+
+  <script>
+    function addMessage(text, cls) {
+      const chat = document.getElementById('chat');
+      const p = document.createElement('p');
+      p.className = cls;
+      p.textContent = text;
+      chat.appendChild(p);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    document.getElementById('send').addEventListener('click', function() {
+      const input = document.getElementById('msg');
+      const text = input.value.trim();
+      if (!text) return;
+      addMessage('You: ' + text, 'user');
+      input.value = '';
+
+      // Updated fetch URL to point to Flask server
+      fetch('http://127.0.0.1:5000/get?msg=' + encodeURIComponent(text))
+        .then(res => res.text())
+        .then(data => {
+          addMessage('Bot: ' + data, 'bot');
+        })
+        .catch(err => {
+          addMessage('Bot: Error contacting server', 'bot');
+        });
+    });
+
+    // send on Enter key
+    document.getElementById('msg').addEventListener('keydown', function(e){
+      if (e.key === 'Enter') document.getElementById('send').click();
+    });
+  </script>
+</body>
+</html>

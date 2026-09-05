@@ -1,0 +1,96 @@
+<?php
+// Correct paths since reports.php is in modules folder
+include('../config/db_connect.php');  
+require('../fpdf/fpdf.php');           
+
+// Fetch summary data
+$total_patients = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM patients"))['total'];
+$total_donors = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM donors"))['total'];
+$total_banks = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM stemcell_banks"))['total'];
+$total_transplants = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM transplants"))['total'];
+
+if (isset($_POST['download_pdf'])) {
+    // Create PDF
+    $pdf = new FPDF();
+    $pdf->AddPage();
+    $pdf->SetFont('Arial','B',16);
+    $pdf->Cell(0,10,'Stem Cell Database Report',0,1,'C');
+    $pdf->Ln(10);
+
+    $pdf->SetFont('Arial','',12);
+    $pdf->Cell(0,10,"Total Patients: $total_patients",0,1);
+    $pdf->Cell(0,10,"Total Donors: $total_donors",0,1);
+    $pdf->Cell(0,10,"Total Stem Cell Banks: $total_banks",0,1);
+    $pdf->Cell(0,10,"Total Transplants: $total_transplants",0,1);
+    $pdf->Ln(10);
+
+    $pdf->Cell(0,10,"Generated on: ".date("Y-m-d H:i:s"),0,1);
+    $pdf->Output("D", "StemCell_Report.pdf");
+    exit;
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reports | Stem Cell DB</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 60%;
+      margin: auto;
+    }
+    h1 { text-align: center; color: #333; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+    th { background-color: #4CAF50; color: white; }
+    .btn {
+      display: inline-block;
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-top: 20px;
+      cursor: pointer;
+      border: none;
+    }
+    .btn:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Stem Cell Database - Reports</h1>
+    <table>
+      <tr><th>Category</th><th>Count</th></tr>
+      <tr><td>Total Patients</td><td><?php echo $total_patients; ?></td></tr>
+      <tr><td>Total Donors</td><td><?php echo $total_donors; ?></td></tr>
+      <tr><td>Total Stem Cell Banks</td><td><?php echo $total_banks; ?></td></tr>
+      <tr><td>Total Transplants</td><td><?php echo $total_transplants; ?></td></tr>
+    </table>
+
+    <form method="post">
+      <button type="submit" name="download_pdf" class="btn">Download PDF Report</button>
+    </form>
+  </div>
+</body>
+</html>
